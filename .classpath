@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MidiBusJava">
+		<accessrules>
+			<accessrule kind="accessible" pattern="*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/echolevelstudio/Documents/workspace2/libraries/core.jar"/>
+	<classpathentry kind="lib" path="/Users/echolevelstudio/Documents/workspace2/libraries/themidibus/library/themidibus.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
