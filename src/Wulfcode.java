@@ -1,4 +1,3 @@
-
 import javax.sound.midi.*;
 import java.awt.Color;
 import java.awt.Font;
@@ -19,9 +18,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import com.sun.awt.AWTUtilities;
-
 import themidibus.*;
-
 
 
 public class Wulfcode {
@@ -43,12 +40,13 @@ public class Wulfcode {
 	boolean shiftpressed = false;
 	JTextArea textarea = new JTextArea();
 	JTextArea textoutput = new JTextArea();
-	JFrame jframe = new JFrame();
-	JFrame jframe2 = new JFrame();
+	JFrame jframe;
+	JFrame jframe2;
 	UndoManager undoManager = new UndoManager();
 	MidiBus myMidi;
 	int clockcount = 0;
 	int randnote = 0;
+	public boolean clockrunning = true;
 	public NoteMachine noter;
 	public CCMachine ccer;
 	public ArrayList<NoteMachine> machinelist;
@@ -60,6 +58,7 @@ public class Wulfcode {
 	public int lastselectedstart = 0;
 	public int lastselectedend = 0;
 	String[] beatnumbers = {"ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE"};
+	// Defaults, in case there's no wulfcode_config.txt 
 	public String inputbgcol = "0x080808";
 	public String inputtextcol = "0xc6a8c1";
 	public String outputbgcol = "0xcaa5c1";
@@ -77,6 +76,9 @@ public class Wulfcode {
 	public int startposy = 0;
 	public int midiin = -1; 
 	public int midiout = -1;
+	public String inputtextweight = "BOLD";
+	public String outputtextweight = "PLAIN";
+	public boolean constantclock = false;
 	public float jvmversion = 0;
 
 	boolean locationset = false;
@@ -99,6 +101,7 @@ public class Wulfcode {
 		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
 		jvmversion = Float.parseFloat(System.getProperty("java.version").substring(0, 3));
 		
+		
 		try {
 			props = new Properties();
 			props.load(new FileInputStream(System.getProperty("user.home") + "/wulfcode_config.txt"));
@@ -108,6 +111,10 @@ public class Wulfcode {
 		if (props != null) {
 			if(props.containsKey("midiin")) {midiin = Integer.parseInt(props.getProperty("midiindevice", "./"));	}
 			if(props.containsKey("midiout")) {midiout = Integer.parseInt(props.getProperty("midioutdevice", "./")); 	}
+			if(props.containsKey("constantclock")) {
+				constantclock = Boolean.parseBoolean(props.getProperty("constantclock", "./"));	
+				clockrunning = false;
+			}
 			if(props.containsKey("initialopacity")) {initialopacity = Integer.parseInt(props.getProperty("initialopacity", "./"));	}
 			if(props.containsKey("windoworder")) {windoworder = Integer.parseInt(props.getProperty("windoworder", "./"));	}
 			if(props.containsKey("windoworientation")) {windoworientation = props.getProperty("windoworientation", "./");	}
@@ -121,6 +128,8 @@ public class Wulfcode {
 			if(props.containsKey("inputbgcol")) {inputbgcol = "0x" + props.getProperty("inputbgcol", "./");	}
 			if(props.containsKey("inputtextcol")) {inputtextcol = "0x" + props.getProperty("inputtextcol", "./");	}
 			if(props.containsKey("inputtextsize")) {inputtextsize = Integer.parseInt(props.getProperty("inputtextsize", "./"));	}
+			if(props.containsKey("inputtextweight")) {inputtextweight = props.getProperty("inputtextweight", "./");	}
+			if(props.containsKey("outputtextweight")) {outputtextweight = props.getProperty("outputtextweight", "./");	}
 			if(props.containsKey("inputwidth")) {inputwidth = Integer.parseInt(props.getProperty("inputwidth", "./"));	}
 			if(props.containsKey("inputheight")) {inputheight = Integer.parseInt(props.getProperty("inputheight", "./"));	}
 		}
@@ -134,7 +143,11 @@ public class Wulfcode {
 
 		textarea.setBackground(Color.decode(inputbgcol));
 		textarea.setForeground(Color.decode(inputtextcol)); 
-		textarea.setFont(new Font("Courier", Font.BOLD, inputtextsize));
+		if(inputtextweight.toUpperCase().equals("BOLD")) {
+			textarea.setFont(new Font("Courier", Font.BOLD, inputtextsize));
+		} else {
+			textarea.setFont(new Font("Courier", Font.PLAIN, inputtextsize));
+		}
 		textarea.setSelectionColor(Color.decode("0x24ab94"));
 		textarea.setSize(inputwidth, inputheight);
 		textarea.setBounds(inputwidth, 0, inputwidth, inputheight);
@@ -150,23 +163,24 @@ public class Wulfcode {
 
 		textoutput.setBackground(Color.decode(outputbgcol));
 		textoutput.setForeground(Color.decode(outputtextcol));
-		textoutput.setFont(new Font("Courier", Font.PLAIN, outputtextsize));
+		if(outputtextweight.toUpperCase().equals("BOLD")) {
+			textoutput.setFont(new Font("Courier", Font.BOLD, outputtextsize));
+		} else {
+			textoutput.setFont(new Font("Courier", Font.PLAIN, outputtextsize));
+		}
 		textoutput.setSelectionColor(Color.decode("0x24ab94"));
 		textoutput.setSize(outputwidth, outputheight);
 		textoutput.setBounds(0, 0, outputwidth, outputheight);
 		textoutput.setCaretColor(Color.decode(outputtextcol));
 		textoutput.setMargin(new Insets(4, 4, 4, 4));
 
-		//JScrollPane scroll = new JScrollPane(textoutput, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		//scroll.setBounds(640, 0, 1280, 800);
-		//scroll.setSize(640, 800);		
-		//jframe2.add(scroll);
+		JFrame jframe = new JFrame();
+		JFrame jframe2 = new JFrame();
 		jframe.add(textarea);
 		jframe2.add(textoutput);
 		jframe.setSize(inputwidth, inputheight);
 		jframe2.setSize(outputwidth, outputheight);
-		//jframe.setBackground(Color.decode("0x080808"));
-		//jframe.setBounds(0, 0, 1280, 800);
+
 		if(windoworientation.equals("horizontal")) {
 			if(windoworder < 2) {
 				jframe.setBounds(startposx, startposy, inputwidth, inputheight);
@@ -184,11 +198,8 @@ public class Wulfcode {
 				jframe2.setBounds(startposx, startposy, outputwidth, outputheight);			
 			}
 		}
-		//jframe.setUndecorated(true); //- removes OS border, but means you can't move the window around! Only use if defining position		
-		jframe.setVisible(true);	
-		jframe2.setVisible(true);
-		jframe2.toFront();
-		jframe.toFront(); // Give text entry the focus
+				
+		
 		float opac = initialopacity * 0.01f;
 		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
 		if(jvmversion > 1.6f) {
@@ -196,10 +207,17 @@ public class Wulfcode {
 		}
 		AWTUtilities.setWindowOpacity(jframe, opac);
 		AWTUtilities.setWindowOpacity(jframe2, opac);
+		jframe.setVisible(true);	
+		jframe2.setVisible(true);
+		jframe2.toFront();
+		jframe.toFront(); // Give text entry the focus
 		//p.frame.toBack(); // Give text entry the focus
 		jframe.setTitle("Wulfcode Input");
 		jframe2.setTitle("Wulfcode Output");
 
+		
+
+		
 		textoutput.setEditable(false);
 		textoutput.setCaretPosition(textoutput.getDocument().getLength());
 
@@ -258,6 +276,9 @@ public class Wulfcode {
 				if(event.getKeyCode() == 157) {
 					ctrlpressed = true;
 				}
+				if(event.getKeyCode() == 17) {
+					ctrlpressed = true;
+				}
 
 				if(event.getKeyCode() == 16) {
 					shiftpressed = true;
@@ -289,7 +310,7 @@ public class Wulfcode {
 				}
 
 				if(event.getKeyCode() == 49 ) {
-					if(ctrlpressed) {
+					if(ctrlpressed && textarea.getSelectedText() != null) {
 						String input = textarea.getSelectedText();
 						lastselectedstart = textarea.getSelectionStart();
 						lastselectedend = textarea.getSelectionEnd();
@@ -327,7 +348,10 @@ public class Wulfcode {
 				}
 				if(event.getKeyCode() == 157) {
 					ctrlpressed = false;
-				}				
+				}		
+				if(event.getKeyCode() == 17) {
+					ctrlpressed = false;
+				}
 				if(event.getKeyCode() == 16) {
 					shiftpressed = false;
 				}				
@@ -358,16 +382,20 @@ public class Wulfcode {
 
 		String [] parts = cmd.split(" ");
 		if(parts[0].equals("chord") && parts.length > 2) {
+			int temptransp = 0;
+			if(parts.length > 3 ) {
+				temptransp = Integer.parseInt(parts[3]);
+			}
 			boolean foundexisting = false;
 			for (int i=0; i<chordlist.size(); i++ ) {
 				if(chordlist.get(i).name.equals(parts[1])){
-					chordlist.set(i, new Chord(parts[1], parts[2].substring(1, parts[2].length()-1), Integer.parseInt(parts[3])));
+					chordlist.set(i, new Chord(parts[1], parts[2].substring(1, parts[2].length()-1), temptransp));
 					foundexisting = true;
 					System.out.println("Created chord " + chordlist.get(i).name + " with notes: " + chordlist.get(i).notes[0] + ", " + chordlist.get(i).notes[1] + ", etc.");
 				} 
 			}
 			if(!foundexisting){
-				chordlist.add(new Chord(parts[1], parts[2].substring(1, parts[2].length()-1), Integer.parseInt(parts[3])));
+				chordlist.add(new Chord(parts[1], parts[2].substring(1, parts[2].length()-1), temptransp));
 
 			}							
 
@@ -417,22 +445,22 @@ public class Wulfcode {
 					if(velocs.get(j).name.equals(parts[2])) {
 						velocs.get(j).shuffle();
 						int cursorline = textarea.getCaretPosition();
-						String updated = "";
+						String updatedvelo = "";
 						String[] lines = textarea.getText().split(System.getProperty("line.separator"));
 						for (int t = 0; t < lines.length; t++) {							
-							if(lines[t].length() > parts[1].length() && lines[t].substring(0, parts[1].length()).contains(parts[2])) {
+							if(lines[t].substring(0, 4).equals("velo") && lines[t].substring(5, 5+parts[2].length()).equals(parts[2])) {
 								String chunk1 = lines[t].substring(0, lines[t].indexOf("{"));
 								String chunk2 = lines[t].substring(lines[t].indexOf("}"), lines[t].length());
 								String newvelos = "";
 								for (int k=0; k < velocs.get(j).invelos.length; k++) {
 									newvelos += velocs.get(j).invelos[k];
 								}
-								updated += chunk1 + "{" + newvelos + chunk2 + System.getProperty("line.separator");
-							}	else {
-								updated += lines[t] + System.getProperty("line.separator");
+								updatedvelo += chunk1 + "{" + newvelos + chunk2 + System.getProperty("line.separator");
+							}	else {								
+								updatedvelo += lines[t] + System.getProperty("line.separator");
 							}
-						}						
-						textarea.setText(updated);
+						}										
+						textarea.setText(updatedvelo);
 						textarea.setCaretPosition(cursorline);
 						textarea.setSelectionStart(lastselectedstart);
 						textarea.setSelectionEnd(lastselectedend);	
@@ -806,11 +834,32 @@ public class Wulfcode {
 	public void midiMessage(MidiMessage message) {
 		if(message.getStatus() == 0xFA) {
 			clockcount = 1; // Start the clock!
+			if(constantclock) {
+				clockrunning = true;
+			}
 			sync();
 		}
+		if(message.getStatus() == 0xFC) {
+			// Stop!
+			if(constantclock) {
+				clockrunning = false;
+				for (int i = 0; i < machinelist.size(); i++) {
+					machinelist.get(i).seqcounter = 0;
+				}
+				for (int i = 0; i < cclist.size(); i++) {
+					cclist.get(i).seqcounter = 0;
+				}
+			}
+		}
 		if(message.getStatus() == 0xF8) {
-			//sync(System.currentTimeMillis());
-			sync();
+			//if the clock's already been started, keep running sync
+			if(constantclock) {
+				if(clockrunning) {
+					sync();
+				}
+			} else {
+				sync();
+			}
 		}
 		if(message.getStatus() == 0xF2) {
 			// We've got a song position message - doesn't matter what it is, but it means playback's just been started. Reset clock.
@@ -883,8 +932,7 @@ public class Wulfcode {
 		}
 
 		public void shuffle () {
-			for (int i=0; i < velos.length; i++) {
-
+			for (int i=0; i < invelos.length; i++) {				
 				Random rnd = new Random();
 				for (int j = invelos.length - 1; j > 0; j--)
 				{
@@ -893,8 +941,11 @@ public class Wulfcode {
 					String a = invelos[index];
 					invelos[index] = invelos[j];
 					invelos[j] = a;
-				}
-
+					
+				}				
+			}
+			for ( int i = 0; i < velos.length; i++ ) {					
+				velos[i] = Integer.parseInt(String.valueOf(invelos[i]), 16); //parse hex
 			}
 		}
 	}
