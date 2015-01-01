@@ -34,7 +34,8 @@ I'm using Eclipse Juno on OS X, so this entire repo might be importable into Ecl
 
 * Lerping of CC values over time - needs to be optional, but it might be cool to have smooth modulations on slow sequences. Meanwhile, the low-res steppiness afforded by the a-f hex range is nice enough.
 * Bug testing - there might still be some opportunities for stuck/hung MIDI notes, and various other command-parsing bear traps.
-* Ensure Windows/Linux compatibility
+* Ensure Windows/Linux compatibility.
+* Better (any) useful info in the output window. Currently it shows MIDI devices on startup, and counts incoming beats by four (arbitrarily) to show that a MIDI clock is being received properly. It'll soon show error messages, a help screen, and listings of extant objects (in case their instantiating command has been deleted from the input screen).
 
 ### To Not Do:
 * Shuffle/swing timing: it's possible already, but involves a bit of lateral thinking.
