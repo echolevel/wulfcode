@@ -22,6 +22,14 @@ This is good for setting up a Note Object but immediately muting it, then tweaki
 
 if selected and evaluated will run a seamless 12-note sequence on the same MIDI channel from two Note Objects.
 
+### Running: 
+
+When there's a .jar available, Mac users should first copy wulfcode_config.txt to their home directory and then run Wulfcode by double-clicking the Wulfcode.jar file. Copying the config isn't absolutely necessary, but it's where all persistent options (screen colours, sizes, positions, MIDI device options, etc.) need to be set to make life easier. OS X's built-in IAC MIDI Bus (see Audio MIDI Setup in Utilities) is perfect for the virtual routing of MIDI data between your DAW and Wulfcode. Generally, you'll want to have one synth or sampler per DAW track, and each will be set to receive on a separate MIDI channel between 1 and 16. Once DAW playback is started, and its MIDI clock is being sent out to the IAC Bus on which Wulfcode is receiving, and Wulfcode is sending its output to an IAC Bus on which the DAW is receiving, any Note Objects you create in Wulfcode should start playing notes!
+
+### Compiling:
+
+I'm using Eclipse Juno on OS X, so this entire repo might be importable into Eclipse as a project. If not, the Java code is all in one file, and the only dependencies are [The MidiBus](https://github.com/sparks/themidibus) and the core.jar from [Processing](http://processing.org) (Processing is required by The MidiBus and is not otherwise used - if you want Wulfcode to be free of Processing, you'll have to write your own MIDI code. I did once de-Processing-ify The MidiBus for another project, but it's years out of date). Add these two external libraries in your build path and maybe it'll work...
+
 ### To Do:
 
 * Lerping of CC values over time - needs to be optional, but it might be cool to have smooth modulations on slow sequences. Meanwhile, the low-res steppiness afforded by the a-f hex range is nice enough.
