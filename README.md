@@ -3,6 +3,8 @@ Wulfcode
 
 ## A Midi live-coding environment for performance or composition
 
+[![Wulfcode demo vid](http://img.youtube.com/vi/M3lislW8l2Q/hqdefault.jpg)](https://www.youtube.com/watch?v=M3lislW8l2Q)
+
 What is Wulfcode for? Ostensibly live-coding, but it’s dramatically simplified compared to the SuperCollider and Csound-based environments used by the live-coding community proper. It’s an object-oriented, text-based MIDI sequencer with its own syntax, and a repertoire of commands and structures that allow interesting looping motifs and polyrythmic phrases to be easily generated and manipulated on the fly. 
 
 Using Wulfcode involves creating a Note Object - a string of semitone-increment note pitches from 0-f (in hex - the letters a-f correspond to 10-16) - with a given speed multiplier and transposition command, then running that in sync with an incoming MIDI clock. This usually comes from a DAW in ‘play’ mode, which is also accepting incoming MIDI from Wulfcode so it can play those notes from its own softsynths or sampler devices. Creating a Note Object also involves specifying a channel, so if I have e.g. an Ableton Live set with a synth or a sampler on channels 1 to 10, I can target a Note Object at channel 3 by typing and evaluating the following:
