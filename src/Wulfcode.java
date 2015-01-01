@@ -2,7 +2,6 @@
 import javax.sound.midi.*;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -13,17 +12,12 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.util.Properties;
-
-
 import com.sun.awt.AWTUtilities;
 
 import themidibus.*;
@@ -83,7 +77,7 @@ public class Wulfcode {
 	public int startposy = 0;
 	public int midiin = -1; 
 	public int midiout = -1;
-
+	public float jvmversion = 0;
 
 	boolean locationset = false;
 
@@ -102,6 +96,8 @@ public class Wulfcode {
 	}	
 
 	public void setup() {
+		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
+		jvmversion = Float.parseFloat(System.getProperty("java.version").substring(0, 3));
 		
 		try {
 			props = new Properties();
@@ -194,6 +190,10 @@ public class Wulfcode {
 		jframe2.toFront();
 		jframe.toFront(); // Give text entry the focus
 		float opac = initialopacity * 0.01f;
+		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
+		if(jvmversion > 1.6f) {
+			opac = 1.0f;
+		}
 		AWTUtilities.setWindowOpacity(jframe, opac);
 		AWTUtilities.setWindowOpacity(jframe2, opac);
 		//p.frame.toBack(); // Give text entry the focus
@@ -656,6 +656,10 @@ public class Wulfcode {
 
 			if(Integer.parseInt(parts[1]) <= 100 && Integer.parseInt(parts[1]) > 0) {
 				float opac = Integer.parseInt(parts[1]) * 0.01f;
+				// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
+				if(jvmversion > 1.6f) {
+					opac = 1.0f;
+				}
 				AWTUtilities.setWindowOpacity(jframe, opac);
 				AWTUtilities.setWindowOpacity(jframe2, opac);
 			}
