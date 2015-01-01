@@ -17,8 +17,8 @@ Evaluating: this is how a command is run. After typing a command on a single, bl
 
 This is good for setting up a Note Object but immediately muting it, then tweaking it further before unmuting it back into the mix. You can also run multiple longer commands simultaneously by selecting multiple lines and evaluating, e.g.:
 
-    noter c0 {0237a3------} 12 0
-    noted c0 {------ac75a7} 12 -12
+    mynoteobject c0 {0237a3------} 12 0
+    mynoteobject c0 {------ac75a7} 12 -12
 
 if selected and evaluated will run a seamless 12-note sequence on the same MIDI channel from two Note Objects.
 
