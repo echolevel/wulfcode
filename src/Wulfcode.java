@@ -1,24 +1,40 @@
-import javax.sound.midi.*;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
+
+import javax.sound.midi.MidiMessage;
+import javax.sound.midi.Sequence;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.border.Border;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
+
+import themidibus.MidiBus;
+
 import com.sun.awt.AWTUtilities;
-import themidibus.*;
+
 
 
 public class Wulfcode {
@@ -41,7 +57,6 @@ public class Wulfcode {
 	JTextArea textarea = new JTextArea();
 	JTextArea textoutput = new JTextArea();
 	JFrame jframe;
-	JFrame jframe2;
 	UndoManager undoManager = new UndoManager();
 	MidiBus myMidi;
 	int clockcount = 0;
@@ -70,21 +85,51 @@ public class Wulfcode {
 	public int outputwidth = 640;
 	public int inputheight = 800;
 	public int outputheight = 800;
-	public String windoworientation = "horizontal";
+	public String panelorientation = "horizontal";
 	public int windoworder = 1;
 	public int startposx = 0;
 	public int startposy = 0;
+	public int startwidth = 1024;
+	public int startheight = 768;
+	public int startsplit = 70;
 	public int midiin = -1; 
 	public int midiout = -1;
 	public String inputtextweight = "BOLD";
 	public String outputtextweight = "PLAIN";
 	public boolean constantclock = false;
 	public float jvmversion = 0;
+	public Color flashcol;
+	public long starttimens = System.nanoTime();
+	public boolean bpmset = true;
+	public int bpm = 128;
+	public JSplitPane splitPane;
+	ComponentResizer cr = new ComponentResizer();
+	DragListener drag = new DragListener();	
 
 	boolean locationset = false;
 
 
 	int activenote = initialroot;
+	
+	public class DragListener extends MouseInputAdapter
+	{
+	    Point location;
+	    MouseEvent pressed;
+	 
+	    public void mousePressed(MouseEvent me)
+	    {
+	        pressed = me;
+	    }
+	 
+	    public void mouseDragged(MouseEvent me)
+	    {
+	        Component component = me.getComponent();
+	        location = component.getLocation(location);
+	        int x = location.x - pressed.getX() + me.getX();
+	        int y = location.y - pressed.getY() + me.getY();
+	        component.setLocation(x, y);
+	     }
+	}
 
 	public static void main(String args[]) {
 
@@ -116,16 +161,27 @@ public class Wulfcode {
 				clockrunning = false;
 			}
 			if(props.containsKey("initialopacity")) {initialopacity = Integer.parseInt(props.getProperty("initialopacity", "./"));	}
-			if(props.containsKey("windoworder")) {windoworder = Integer.parseInt(props.getProperty("windoworder", "./"));	}
-			if(props.containsKey("windoworientation")) {windoworientation = props.getProperty("windoworientation", "./");	}
+			if(props.containsKey("panelorientation")) {panelorientation = props.getProperty("panelorientation", "./");	}
 			if(props.containsKey("startposx")) {startposx = Integer.parseInt(props.getProperty("startposx", "./"));	}
 			if(props.containsKey("startposy")) {startposy = Integer.parseInt(props.getProperty("startposy", "./"));	}
+			if(props.containsKey("startwidth")) {startwidth = Integer.parseInt(props.getProperty("startwidth", "./"));	}
+			if(props.containsKey("startheight")) {startheight = Integer.parseInt(props.getProperty("startheight", "./"));	}
+			if(props.containsKey("startsplit")) {startsplit= Integer.parseInt(props.getProperty("startsplit", "./"));	}
 			if(props.containsKey("outputbgcol")) {outputbgcol = "0x" + props.getProperty("outputbgcol", "./");			}
 			if(props.containsKey("outputtextcol")) {outputtextcol = "0x" + props.getProperty("outputtextcol", "./");	}
 			if(props.containsKey("outputtextsize")) {outputtextsize = Integer.parseInt(props.getProperty("outputtextsize", "./"));	}
 			if(props.containsKey("outputwidth")) {outputwidth = Integer.parseInt(props.getProperty("outputwidth", "./"));	}
 			if(props.containsKey("outputheight")) {outputheight = Integer.parseInt(props.getProperty("outputheight", "./"));	}
-			if(props.containsKey("inputbgcol")) {inputbgcol = "0x" + props.getProperty("inputbgcol", "./");	}
+			if(props.containsKey("inputbgcol")) {
+				inputbgcol = "0x" + props.getProperty("inputbgcol", "./");	
+				int tempr = Color.decode(inputbgcol).getRed() + 80;
+				if(tempr > 255) { tempr = 255; }
+				int tempg = Color.decode(inputbgcol).getGreen() + 80;
+				if(tempg > 255) { tempg = 255; }
+				int tempb = Color.decode(inputbgcol).getBlue() + 80;
+				if(tempb > 255) { tempb = 255; }
+				flashcol = new Color(tempr, tempg, tempb);
+			}
 			if(props.containsKey("inputtextcol")) {inputtextcol = "0x" + props.getProperty("inputtextcol", "./");	}
 			if(props.containsKey("inputtextsize")) {inputtextsize = Integer.parseInt(props.getProperty("inputtextsize", "./"));	}
 			if(props.containsKey("inputtextweight")) {inputtextweight = props.getProperty("inputtextweight", "./");	}
@@ -174,53 +230,72 @@ public class Wulfcode {
 		textoutput.setCaretColor(Color.decode(outputtextcol));
 		textoutput.setMargin(new Insets(4, 4, 4, 4));
 
+		
 		JFrame jframe = new JFrame();
-		JFrame jframe2 = new JFrame();
-		jframe.add(textarea);
-		jframe2.add(textoutput);
-		jframe.setSize(inputwidth, inputheight);
-		jframe2.setSize(outputwidth, outputheight);
+		//jframe.add(textarea);
+		
 
-		if(windoworientation.equals("horizontal")) {
-			if(windoworder < 2) {
-				jframe.setBounds(startposx, startposy, inputwidth, inputheight);
-				jframe2.setBounds(startposx+inputwidth, startposy, outputwidth, outputheight);
-			} else {
-				jframe.setBounds(startposx+outputwidth, startposy, inputwidth, inputheight);
-				jframe2.setBounds(startposx, startposy, outputwidth, outputheight);			
-			}
-		} else if(windoworientation.equals("vertical")) {
-			if(windoworder < 2) {
-				jframe.setBounds(startposx, startposy, inputwidth, inputheight);
-				jframe2.setBounds(startposx, startposy+inputheight, outputwidth, outputheight);
-			} else {
-				jframe.setBounds(startposx, startposy+outputheight, inputwidth, inputheight);
-				jframe2.setBounds(startposx, startposy, outputwidth, outputheight);			
-			}
+		jframe.setSize(inputwidth, inputheight);
+
+		if(panelorientation.equals("horizontal")) {			
+			jframe.setBounds(startposx+3, startposy+3, inputwidth+6, inputheight+6);
+
+		} else if(panelorientation.equals("vertical")) {
+			
+				jframe.setBounds(startposx+3, startposy+3, inputwidth+6, inputheight+6);				
 		}
 				
+		
+		textarea.setMinimumSize(new Dimension(1,1));
+		textoutput.setMinimumSize(new Dimension(1,1));
+		
+		if(panelorientation.equals("horizontal")) {
+			splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+			splitPane.setDividerLocation(startwidth/100 * startsplit);
+		} else {
+			splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			splitPane.setDividerLocation(startheight/100 * startsplit);
+		}
+		
+		splitPane.setBounds(startposx, startposy, startwidth, startheight);
+		
+		splitPane.setPreferredSize(new Dimension(startwidth, startheight));
+		splitPane.setLeftComponent(textarea);
+		splitPane.setRightComponent(textoutput);
+		splitPane.setMinimumSize(new Dimension(1, 1));		
+		
+		// Pad everything so I can have a resizable, movable AND translucent window 
+		Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
+		JPanel pan = new JPanel(new BorderLayout());
+		pan.add(splitPane);
+		pan.setBorder(padding);
+		jframe.add(pan);
+		jframe.addMouseListener( drag );
+		jframe.addMouseMotionListener( drag );
+		cr.setSnapSize(new Dimension(10,10));
+		cr.registerComponent(jframe);
 		
 		float opac = initialopacity * 0.01f;
 		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
 		if(jvmversion > 1.6f) {
-			opac = 1.0f;
-		}
-		AWTUtilities.setWindowOpacity(jframe, opac);
-		AWTUtilities.setWindowOpacity(jframe2, opac);
+			//opac = 1.0f;
+		}	
+		jframe.setUndecorated(true);
+
+		//AWTUtilities.setWindowOpacity(jframe, opac);
+		jframe.setOpacity(opac);
+
 		jframe.setVisible(true);	
-		jframe2.setVisible(true);
-		jframe2.toFront();
+		//jframe2.setVisible(true);
+
 		jframe.toFront(); // Give text entry the focus
 		//p.frame.toBack(); // Give text entry the focus
-		jframe.setTitle("Wulfcode Input");
-		jframe2.setTitle("Wulfcode Output");
-
+		jframe.setTitle("Wulfcode");
 		
 
 		
 		textoutput.setEditable(false);
 		textoutput.setCaretPosition(textoutput.getDocument().getLength());
-
 
 
 
@@ -260,6 +335,9 @@ public class Wulfcode {
 		myMidi.sendTimestamps(false); // Does this help or hinder? Try to replicate Java midi->IAC bug...
 		System.out.println("In: " + inname + "   Out: " + outname);
 
+		
+
+		
 		textarea.addKeyListener(new KeyListener () {
 
 			public void keyPressed(java.awt.event.KeyEvent event) {
@@ -309,34 +387,67 @@ public class Wulfcode {
 					}
 				}
 
-				if(event.getKeyCode() == 49 ) {
-					if(ctrlpressed && textarea.getSelectedText() != null) {
-						String input = textarea.getSelectedText();
-						lastselectedstart = textarea.getSelectionStart();
-						lastselectedend = textarea.getSelectionEnd();
-						if(input.contains(";")) {
-							String[] commands = input.split(";");
-							for (int i=0; i < commands.length; i++ ) {
-								//println(commands[i]);
-								commands[i] = commands[i].trim();
-								cmdParse(commands[i]);
+				if(event.getKeyCode() == 49 || event.getKeyCode() == 82) {
+					if(ctrlpressed) {
+						
+						int caretpos = textarea.getCaretPosition();
+						// If there's a selection, do it the old way - check for multi-command lines, for multiple lines, then just fire
+						if(textarea.getSelectedText()!=null && textarea.getSelectedText().length() > 1) {
+
+							String input = textarea.getSelectedText();
+							lastselectedstart = textarea.getSelectionStart();
+							lastselectedend = textarea.getSelectionEnd();
+							textarea.setBackground(flashcol);
+							if(input.contains(";")) {
+								String[] commands = input.split(";");
+								for (int i=0; i < commands.length; i++ ) {
+									//println(commands[i]);
+									commands[i] = commands[i].trim();
+									cmdParse(commands[i]);
+								}
+							} else if (input.contains("\n")){
+								String[] commands = input.split("\n");
+								for (int i=0; i < commands.length; i++) {
+									commands[i] = commands[i].trim();
+									cmdParse(commands[i]);
+								}
+							} else if (input.contains("\r")){
+								String[] commands = input.split("\r");
+								for (int i=0; i < commands.length; i++) {
+									commands[i] = commands[i].trim();
+									cmdParse(commands[i]);
+								}
+							} else {
+								cmdParse(textarea.getSelectedText());
 							}
-						} else if (input.contains("\n")){
-							String[] commands = input.split("\n");
-							for (int i=0; i < commands.length; i++) {
-								commands[i] = commands[i].trim();
-								cmdParse(commands[i]);
-							}
-						} else if (input.contains("\r")){
-							String[] commands = input.split("\r");
-							for (int i=0; i < commands.length; i++) {
-								commands[i] = commands[i].trim();
-								cmdParse(commands[i]);
-							}
+							textarea.setCaretPosition(caretpos);
+
 						} else {
-							cmdParse(textarea.getSelectedText());
+							// Otherwise, if nothing's selected, evaluate everything on the current line (including possible multis)
+							int caretline = RXTextUtilities.getLineAtCaret(textarea);
+							String allscreen = textarea.getText();
+							String[] alllines = allscreen.split("\n");
+							if(alllines[caretline-1].length() > 2) {
+								textarea.setBackground(flashcol);
+								String incommand = alllines[caretline-1];
+								
+								if(incommand.contains(";")) {
+									String[] commands = incommand.split(";");
+									for (int i=0; i < commands.length; i++ ) {
+										//println(commands[i]);
+										commands[i] = commands[i].trim();
+										cmdParse(commands[i]);
+									}
+								} else {								
+									cmdParse(incommand);
+								}
+								textarea.setCaretPosition(caretpos);
+							} else {
+								System.out.println("No valid command");
+							}
 						}
 					}
+
 				}
 
 
@@ -369,6 +480,17 @@ public class Wulfcode {
 
 	public void run() {
 		while(!finished){
+			
+			long aminute = 60000000000L;
+			long bpmns = aminute / (bpm * 24); // multiply by 96 to get 24ppqn
+						
+			if(bpmset) {
+				if(((System.nanoTime() - starttimens) >= bpmns)) {
+					//System.out.println("Currentelapsed: " + (System.nanoTime() - starttimens) + "bpmns: " + bpmns);
+					starttimens = System.nanoTime();
+					this.sync();
+				}
+			}
 			if(close) {				
 				break;
 			}				
@@ -381,7 +503,7 @@ public class Wulfcode {
 	public void cmdParse(String cmd) {		
 
 		String [] parts = cmd.split(" ");
-		if(parts[0].equals("chord") && parts.length > 2) {
+		if((parts[0].equals("chord") || parts[0].equals("ch")) && parts.length > 2) {
 			int temptransp = 0;
 			if(parts.length > 3 ) {
 				temptransp = Integer.parseInt(parts[3]);
@@ -439,8 +561,8 @@ public class Wulfcode {
 				}					
 			}
 
-		} else if (parts[0].equals("hoof") && parts.length > 1) {
-			if(parts.length > 2 && parts[1].equals("velo")) {
+		} else if ((parts[0].equals("hoof") || parts[0].equals("hf")) && parts.length > 1) {
+			if(parts.length > 2 && (parts[1].equals("velo") || parts[1].equals("vl"))) {
 				for (int j=0; j < velocs.size(); j++) {
 					if(velocs.get(j).name.equals(parts[2])) {
 						velocs.get(j).shuffle();
@@ -448,7 +570,7 @@ public class Wulfcode {
 						String updatedvelo = "";
 						String[] lines = textarea.getText().split(System.getProperty("line.separator"));
 						for (int t = 0; t < lines.length; t++) {							
-							if(lines[t].substring(0, 4).equals("velo") && lines[t].substring(5, 5+parts[2].length()).equals(parts[2])) {
+							if((lines[t].substring(0, 4).equals("velo") || lines[t].substring(0, 4).equals("vl"))&& lines[t].substring(5, 5+parts[2].length()).equals(parts[2])) {
 								String chunk1 = lines[t].substring(0, lines[t].indexOf("{"));
 								String chunk2 = lines[t].substring(lines[t].indexOf("}"), lines[t].length());
 								String newvelos = "";
@@ -584,7 +706,7 @@ public class Wulfcode {
 		} else if(parts[0].equals("stop")) {
 			myMidi.sendMessage(javax.sound.midi.ShortMessage.STOP); // This might work on Windows/Linux, but not on OSX's fucking disastrous Java MIDI implementation			
 		}
-		else if (parts[0].equals("velo") && parts.length > 2) {
+		else if ((parts[0].equals("velo") || parts[0].equals("vl")) && parts.length > 2) {
 			// String name, int future, divr, looping
 			boolean exists = false;
 			for (int i=0; i < velocs.size(); i++) {
@@ -601,6 +723,7 @@ public class Wulfcode {
 		} else if(parts[0].equals("help")) {
 			// Spit out a list of commands and whatnot
 			
+			
 		} else if(parts[0].equals("list") && parts.length > 1) {
 			// List objects (note, cc, velo, chord) with current playing/muting state, target channel, etc.
 			
@@ -611,7 +734,11 @@ public class Wulfcode {
 				initialroot+= key;
 			}
 
-		}  else if (parts[0].equals("pause") && parts.length > 1) {
+		}  else if(bpmset && parts[0].equals("bpm") && parts.length > 1) {
+			bpm = Integer.parseInt(parts[1]);
+			
+		} else if ((parts[0].equals("pause") || parts[0].equals("ps")) && parts.length > 1) {
+		
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					machinelist.get(i).kill();
@@ -619,28 +746,28 @@ public class Wulfcode {
 				}
 			}			
 
-		}  else if (parts[0].equals("unpause") && parts.length > 1) {
+		}  else if ((parts[0].equals("unpause") || parts[0].equals("up")) && parts.length > 1) {
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					machinelist.get(i).playing = true;
 				}
 			}		
 
-		}  else if (parts[0].equals("mute") && parts.length > 1) {
+		}  else if ((parts[0].equals("mute") || parts[0].equals("mu")) && parts.length > 1) {
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					machinelist.get(i).muted = true;
 				}
 			}		
 
-		}  else if (parts[0].equals("unmute") && parts.length > 1) {
+		}  else if ((parts[0].equals("unmute") ||parts[0].equals("um") ) && parts.length > 1) {
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					machinelist.get(i).muted = false ;
 				}
 			}		
 
-		} else if(parts[0].equals("ptoggle") && parts.length > 1){ // ptoggle - toggle playing or not playing
+		} else if((parts[0].equals("ptoggle") || parts[0].equals("ptog")) && parts.length > 1){ // ptoggle - toggle playing or not playing
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					if (machinelist.get(i).playing){
@@ -651,7 +778,7 @@ public class Wulfcode {
 				}
 			}
 
-		} else if(parts[0].equals("mtoggle") && parts.length > 1){ // ptoggle - toggle muted or not
+		} else if((parts[0].equals("mtoggle") || parts[0].equals("mtog") ) && parts.length > 1){ // ptoggle - toggle muted or not
 			for (int i=0; i < machinelist.size(); i++) {
 				if(machinelist.get(i).name.equals(parts[1])) {
 					if (machinelist.get(i).muted){
@@ -662,7 +789,7 @@ public class Wulfcode {
 				}
 			}
 
-		} else if(parts[0].equals("mididevice")){
+		} else if((parts[0].equals("mididevice") || parts[0].equals("mdev"))){
 			if(parts.length > 1){
 				if(parts[1].toLowerCase().equals("list")) {
 					for (int i=0; i < MidiBus.availableInputs().length; i++) {
@@ -686,10 +813,11 @@ public class Wulfcode {
 				float opac = Integer.parseInt(parts[1]) * 0.01f;
 				// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
 				if(jvmversion > 1.6f) {
-					opac = 1.0f;
+					//opac = 1.0f;
 				}
-				AWTUtilities.setWindowOpacity(jframe, opac);
-				AWTUtilities.setWindowOpacity(jframe2, opac);
+				// Wow, I did NOT think this would work...
+				AWTUtilities.setWindowOpacity(Frame.getFrames()[0], opac);
+				
 			}
 
 		} else if (parts[0].equals("kill") && parts.length > 1) {
@@ -707,7 +835,24 @@ public class Wulfcode {
 				}
 			}
 
-		} else if (parts[0].equals("killquit") && parts.length > 1) {
+		} else if(parts[0].equals("ckill") && parts.length > 1) {
+			if(parts[1].length() > 0 && Integer.parseInt(parts[1]) >= 0 && Integer.parseInt(parts[1]) < 16) {
+				int killchannel = Integer.parseInt(parts[1]);
+				for (int i=0; i < machinelist.size(); i++) {
+					if(machinelist.get(i).channel == killchannel) {
+						machinelist.get(i).kill();
+						machinelist.remove(i);
+					}
+				}
+				for (int c = 0; c < cclist.size(); c++) {
+					if(cclist.get(c).channel == killchannel) {
+						cclist.get(c).kill();
+						cclist.remove(c);
+					}
+				}
+			}
+			
+		}else if (parts[0].equals("killquit") && parts.length > 1) {
 			// TO DO			
 
 		} else if(parts[0].equals("cc") && parts.length > 4) {
@@ -834,6 +979,7 @@ public class Wulfcode {
 	public void midiMessage(MidiMessage message) {
 		if(message.getStatus() == 0xFA) {
 			clockcount = 1; // Start the clock!
+			bpmset = false; // disable internal clock
 			if(constantclock) {
 				clockrunning = true;
 			}
@@ -852,6 +998,7 @@ public class Wulfcode {
 			}
 		}
 		if(message.getStatus() == 0xF8) {
+			bpmset = false; // disable internal clock
 			//if the clock's already been started, keep running sync
 			if(constantclock) {
 				if(clockrunning) {
@@ -862,6 +1009,7 @@ public class Wulfcode {
 			}
 		}
 		if(message.getStatus() == 0xF2) {
+			bpmset = false; // disable internal clock
 			// We've got a song position message - doesn't matter what it is, but it means playback's just been started. Reset clock.
 			clockcount = 1;
 			sync();
@@ -886,6 +1034,8 @@ public class Wulfcode {
 
 		if(clockcount % 24 == 0) {
 			String beatmarks = "Beat: ";
+			textarea.setBackground(Color.decode(inputbgcol));
+			
 			if(beatmarker < 4) {
 				beatmarker++;
 			} else {
@@ -1264,5 +1414,6 @@ public class Wulfcode {
 	}
 
 
+	
 }
 

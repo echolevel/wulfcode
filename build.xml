@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Wulfcode.makejar" default="makejar" basedir=".">
+  <target name ="makejar" description="Create a jar for the WC (Wulfcode) project">
+    <jar jarfile="release/Wulfcode.jar" includes="*.class" basedir="bin" >
+    	<manifest>
+  			<attribute name="Main-Class" value="Wulfcode" />
+  		</manifest>
+    </jar>
+  </target>
+</project>
