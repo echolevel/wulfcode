@@ -1,0 +1,48 @@
+# Wulfcode 0.2 config file
+
+# MIDI device setup: to get the right numbers, run Wulfcode and do 'mididevice list'. You'll see a number for each input and output found on your system.
+# If you need to change midi devices while Wulfcode is running, use e.g. 'mididevice 4 6' where 4 is an input port number and 6 is an output port number.
+midiindevice=0
+midioutdevice=2
+
+# MIDI clock type
+# Some DAWs (possibly only Renoise?) emit a constant MIDI clock pulse, even when transport is stopped. This is a bit weird. For most other DAWs (e.g. Ableton
+# Live), keep this set to false; otherwise set it to true. If enabled, Wulfcode won't start running sequences until it receives a 'start' command, and will stop
+# when it gets a 'stop'. Also, 'start' commands will reset all sequence positions to zero so that they're synchronised.
+constantclock=false
+
+# Opacity (percentage) - sadly, this won't work under Java 7 (1.7) due to a bug. Hopefully they'll fix it. If your system runs JARs using a 1.7 JRE/JVM,
+# opacity will be ignored and both windows will always be 100% opaque.
+initialopacity=60
+
+# horizontal - text panels are side by side. vertical - text panels are stacked.
+panelorientation=vertical
+
+# window position on start - width and height where 0,0 is the top left of the screen
+startposx=30
+startposy=30
+
+# window dimensions on start
+startwidth=1024
+startheight = 768
+
+# Divider position on start (as a percentage)
+startsplit = 90
+
+# Input window colours
+inputbgcol=080808
+inputtextcol=c6a8c1
+inputtextsize=18
+inputtextweight=plain
+inputwidth=1280
+inputheight=800
+
+# Output window colours
+outputbgcol=caa5c1
+outputtextcol=080808
+outputtextsize=14
+outputtextweight=plain
+outputwidth=640
+outputheight=800
+
+
