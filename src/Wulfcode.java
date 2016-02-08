@@ -196,9 +196,10 @@ public class Wulfcode {
 		cclist = new ArrayList<CCMachine>();
 		chordlist = new ArrayList<Chord>();
 		velocs = new ArrayList<Velo>();
-
+		
 		textarea.setBackground(Color.decode(inputbgcol));
-		textarea.setForeground(Color.decode(inputtextcol)); 
+		textarea.setForeground(Color.decode(inputtextcol));
+		
 		if(inputtextweight.toUpperCase().equals("BOLD")) {
 			textarea.setFont(new Font("Courier", Font.BOLD, inputtextsize));
 		} else {
