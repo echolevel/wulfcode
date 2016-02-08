@@ -11,9 +11,8 @@ midioutdevice=2
 # when it gets a 'stop'. Also, 'start' commands will reset all sequence positions to zero so that they're synchronised.
 constantclock=false
 
-# Opacity (percentage) - sadly, this won't work under Java 7 (1.7) due to a bug. Hopefully they'll fix it. If your system runs JARs using a 1.7 JRE/JVM,
-# opacity will be ignored and both windows will always be 100% opaque.
-initialopacity=60
+# Opacity as a percentage, where 0 is completely transparent and 100 is opaque.
+initialopacity=75
 
 # horizontal - text panels are side by side. vertical - text panels are stacked.
 panelorientation=vertical
@@ -29,19 +28,24 @@ startheight = 768
 # Divider position on start (as a percentage)
 startsplit = 90
 
-# Input window colours
+# Input window colours/font
 inputbgcol=080808
 inputtextcol=c6a8c1
 inputtextsize=18
 inputtextweight=plain
+
+# Ignored for now
 inputwidth=1280
 inputheight=800
 
-# Output window colours
+
+# Output window colours/font
 outputbgcol=caa5c1
 outputtextcol=080808
 outputtextsize=14
 outputtextweight=plain
+
+# Ignored for now
 outputwidth=640
 outputheight=800
 
