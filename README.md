@@ -6,7 +6,7 @@ Wulfcode
 
 ![Wulfcode screenshot](https://github.com/echolevel/wulfcode/blob/master/Wulfcode_v0.2b3_screenshot.png)
 
-[![Wulfcode demo vid](http://img.youtube.com/vi/M3lislW8l2Q/hqdefault.jpg)](https://www.youtube.com/watch?v=M3lislW8l2Q)
+[Watch demo of basic functionality on YouTube](https://www.youtube.com/watch?v=PnvKsf_k3AM)
 
 What is Wulfcode for? Ostensibly live-coding, but it’s dramatically simplified compared to the SuperCollider and Csound-based environments used by the live-coding community proper. It’s an object-oriented, text-based MIDI sequencer with its own syntax, and a repertoire of commands and structures that allow interesting looping motifs and polyrythmic phrases to be easily generated and manipulated on the fly. 
 
