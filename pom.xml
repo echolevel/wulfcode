@@ -22,33 +22,26 @@
           <target/>
         </configuration>
       </plugin>
-      <plugin>
-    	<groupId>org.apache.maven.plugins</groupId>
-    	<artifactId>maven-surefire-plugin</artifactId>
-    	<version>2.7.2</version>
-    	<configuration>
-        	<forkMode>never</forkMode>
-        	<argLine>-Xms1024m -Xmx1024m -XX:MaxPermSize=2048m</argLine>
-        	<systemPropertyVariables>
-            	<user.name>${user.name}</user.name>
-        	</systemPropertyVariables>
-    	</configuration>
-	  </plugin>
-      
-    </plugins>
+      </plugins>
   </build>
   <dependencies>
+  	<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+	</dependency>
   	<dependency>
   		<groupId>org.processing</groupId>
   		<artifactId>core</artifactId>
   		<version>2.2.1</version>
   	</dependency>
   	<dependency>
-    	<groupId>midibus</groupId>
-    	<artifactId>com.midibus</artifactId>
-    	<version>1.0</version>
-    	<scope>system</scope>
-    	<systemPath>${project.basedir}/themidibus/library/themidibus.jar</systemPath>
+ 	   	<groupId>sample</groupId>
+    		<artifactId>com.sample</artifactId>
+    		<version>1.0</version>
+    		<scope>system</scope>
+    		<systemPath>${project.basedir}/themidibus/library/themidibus.jar</systemPath>
 	</dependency>
   </dependencies>
 </project>
