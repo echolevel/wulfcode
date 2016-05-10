@@ -1,6 +1,17 @@
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.text.*;
+package source;
+import java.awt.Container;
+import java.awt.FontMetrics;
+import java.awt.Point;
+import java.awt.Rectangle;
+
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Utilities;
+import javax.swing.text.View;
 
 /*
  *	A collection of static methods that provide added functionality for
