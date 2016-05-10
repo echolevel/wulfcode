@@ -1,1 +1,5 @@
+.settings/
 bin/
+target/
+themidibus/
+*.class
