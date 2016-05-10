@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Wulfcode</groupId>
+  <artifactId>Wulfcode</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source/>
+          <target/>
+        </configuration>
+      </plugin>
+      <plugin>
+    	<groupId>org.apache.maven.plugins</groupId>
+    	<artifactId>maven-surefire-plugin</artifactId>
+    	<version>2.7.2</version>
+    	<configuration>
+        	<forkMode>never</forkMode>
+        	<argLine>-Xms1024m -Xmx1024m -XX:MaxPermSize=2048m</argLine>
+        	<systemPropertyVariables>
+            	<user.name>${user.name}</user.name>
+        	</systemPropertyVariables>
+    	</configuration>
+	  </plugin>
+      
+    </plugins>
+  </build>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.processing</groupId>
+  		<artifactId>core</artifactId>
+  		<version>2.2.1</version>
+  	</dependency>
+  	<dependency>
+    	<groupId>midibus</groupId>
+    	<artifactId>com.midibus</artifactId>
+    	<version>1.0</version>
+    	<scope>system</scope>
+    	<systemPath>${project.basedir}/themidibus/library/themidibus.jar</systemPath>
+	</dependency>
+  </dependencies>
+</project>
