@@ -48,7 +48,25 @@ When there's a .jar available, Mac users should first copy wulfcode_config.txt t
 
 ### Compiling:
 
-I'm using Eclipse Juno on OS X, so this entire repo might be importable into Eclipse as a project. If not, the Java code is all in one file, and the only dependencies are [The MidiBus](https://github.com/sparks/themidibus) and the core.jar from [Processing](http://processing.org) (Processing is required by The MidiBus and is not otherwise used - if you want Wulfcode to be free of Processing, you'll have to write your own MIDI code. I did once de-Processing-ify The MidiBus for another project, but it's years out of date). Add these two external libraries in your build path and maybe it'll work...
+I'm using Eclipse Juno on OS X, so this entire repo might be importable into Eclipse as a project. It is confirmed to work on eclipse Mars.
+If not, the Java code is all in one file, and the only dependencies are 
+
+* [The MidiBus](https://github.com/sparks/themidibus) 
+* the core.jar from [Processing](http://processing.org) 
+
+Processing is required by The MidiBus and is not otherwise used - if you want Wulfcode to be free of Processing, you'll have to write your own MIDI code. I did once de-Processing-ify The MidiBus for another project, but it's years out of date. 
+
+Add these two external libraries in your build path and maybe it'll work...
+
+Otherwise the eclipse project is bound to maven and processing is part of the pom.xml dependencies. I added the midibus as a dependency, thought it is not available in a maven repo as I am writing this, you have to add it manually via build path option in eclipse. 
+
+The maven dependencies are : 
+
+* JUnit 3.4.1
+* Processing (core)
+* themidibus.jar
+
+You have to add themidibus folder to the project root.
 
 ### To Do:
 

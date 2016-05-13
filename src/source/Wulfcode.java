@@ -1,3 +1,4 @@
+package source;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -31,12 +32,13 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-import themidibus.MidiBus;
-
 import com.sun.awt.AWTUtilities;
 
+import themidibus.MidiBus;
 
 
+
+@SuppressWarnings("restriction")
 public class Wulfcode {
 
 
@@ -279,11 +281,11 @@ public class Wulfcode {
 		float opac = initialopacity * 0.01f;
 		// Sadly, transparent decorated windows don't seem to work in Java 7. I'll fix this when their bug's fixed.
 		if(jvmversion > 1.6f) {
-			//opac = 1.0f;
+			opac = 1.0f;
 		}	
 		jframe.setUndecorated(true);
 
-		//AWTUtilities.setWindowOpacity(jframe, opac);
+		AWTUtilities.setWindowOpacity(jframe, opac);
 		jframe.setOpacity(opac);
 
 		jframe.setVisible(true);	
